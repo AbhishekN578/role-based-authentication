@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from users.views import students_list
+from users.views import students_list, register, create_user, delete_user, users_list, me
 from assignments.views import assign_task, my_assignments
 
 urlpatterns = [
@@ -27,5 +27,9 @@ urlpatterns = [
     path('api/students/', students_list, name='students_list'),
     path('api/assignments/', assign_task, name='assign_task'),
     path('api/my-assignments/', my_assignments, name='my_assignments'),
-    
+    path('api/register/', register, name='register'),
+    path('api/users/', users_list, name='users_list'),
+    path('api/users/create/', create_user, name='create_user'),
+    path('api/users/<int:pk>/delete/', delete_user, name='delete_user'),
+    path('api/me/', me, name='me'),
 ]

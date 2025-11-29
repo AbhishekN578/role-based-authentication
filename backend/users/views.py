@@ -38,3 +38,44 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 class MyTokenObtainPairView(TokenObtainPairView):
     # Use default serializer or customize if needed
     pass
+
+@api_view(['POST'])
+def register(request):
+    data = request.data
+    if CustomUser.objects.filter(username=data['username']).exists():
+        return Response({'detail': 'Username already exists'}, status=400)
+    user = CustomUser.objects.create_user(
+        username=data['username'],
+        password=data['password'],
+        role='student'
+    )
+    serializer = UserSerializer(user)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_user(request):
+    if request.user.role != 'admin':
+        return Response({'detail': 'Not authorized'}, status=403)
+    data = request.data
+    if CustomUser.objects.filter(username=data['username']).exists():
+        return Response({'detail': 'Username already exists'}, status=400)
+    user = CustomUser.objects.create_user(
+        username=data['username'],
+        password=data['password'],
+        role=data.get('role', 'student')
+    )
+    serializer = UserSerializer(user)
+    return Response(serializer.data)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_user(request, pk):
+    if request.user.role != 'admin':
+        return Response({'detail': 'Not authorized'}, status=403)
+    try:
+        user = CustomUser.objects.get(pk=pk)
+        user.delete()
+        return Response({'detail': 'User deleted'})
+    except CustomUser.DoesNotExist:
+        return Response({'detail': 'User not found'}, status=404)
